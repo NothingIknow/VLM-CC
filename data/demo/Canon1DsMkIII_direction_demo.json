@@ -1,0 +1,50 @@
+[
+  {
+    "id": "Canon1DsMkIII_0086",
+    "messages": [
+      {
+        "role": "user",
+        "content": "<image>\n**Task** Look at the attached image and decide which primary colour channel-Red, Green, or Blue-dominates the illuminant.\n**Private reasoning steps**\n1. **Locate neutral references** Mentally pick up to three regions that should be colour-neutral (e.g., grey concrete, white clouds, metal railings). Avoid vividly coloured or saturated areas, deep shadows, and highlights.\n2. **Compare channel strengths** For each selected region, judge the average R, G, B intensities and note which channel appears strongest.\n3. **Aggregate** Combine evidence across the chosen regions to identify the single channel with the consistently highest relative intensity.\n4. **Think silently** Keep all deliberation internal; do **not** reveal your reasoning.\n\n**Answer format** Reply with exactly one of the tokens below (including the period) and nothing else:\n- Red.\n- Green.\n- Blue."
+      },
+      {
+        "role": "assistant",
+        "content": "Blue."
+      }
+    ],
+    "images": [
+      "Canon1DsMkIII_0086_1.0.png"
+    ]
+  },
+  {
+    "id": "Canon1DsMkIII_0086",
+    "messages": [
+      {
+        "role": "user",
+        "content": "<image>\n**Task** Look at the attached image and decide which primary colour channel-Red, Green, or Blue-dominates the illuminant.\n**Private reasoning steps**\n1. **Locate neutral references** Mentally pick up to three regions that should be colour-neutral (e.g., grey concrete, white clouds, metal railings). Avoid vividly coloured or saturated areas, deep shadows, and highlights.\n2. **Compare channel strengths** For each selected region, judge the average R, G, B intensities and note which channel appears strongest.\n3. **Aggregate** Combine evidence across the chosen regions to identify the single channel with the consistently highest relative intensity.\n4. **Think silently** Keep all deliberation internal; do **not** reveal your reasoning.\n\n**Answer format** Reply with exactly one of the tokens below (including the period) and nothing else:\n- Red.\n- Green.\n- Blue."
+      },
+      {
+        "role": "assistant",
+        "content": "Blue."
+      }
+    ],
+    "images": [
+      "Canon1DsMkIII_0086_2.0.png"
+    ]
+  },
+  {
+    "id": "Canon1DsMkIII_0086",
+    "messages": [
+      {
+        "role": "user",
+        "content": "<image>\n**Task** Look at the attached image and decide which primary colour channel-Red, Green, or Blue-dominates the illuminant.\n**Private reasoning steps**\n1. **Locate neutral references** Mentally pick up to three regions that should be colour-neutral (e.g., grey concrete, white clouds, metal railings). Avoid vividly coloured or saturated areas, deep shadows, and highlights.\n2. **Compare channel strengths** For each selected region, judge the average R, G, B intensities and note which channel appears strongest.\n3. **Aggregate** Combine evidence across the chosen regions to identify the single channel with the consistently highest relative intensity.\n4. **Think silently** Keep all deliberation internal; do **not** reveal your reasoning.\n\n**Answer format** Reply with exactly one of the tokens below (including the period) and nothing else:\n- Red.\n- Green.\n- Blue."
+      },
+      {
+        "role": "assistant",
+        "content": "Green."
+      }
+    ],
+    "images": [
+      "Canon1DsMkIII_0086_3.0.png"
+    ]
+  }
+]

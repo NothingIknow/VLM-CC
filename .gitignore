@@ -1,0 +1,43 @@
+# inherit LLaMA-Factory ignores
+hf_cache/
+ms_cache/
+om_cache/
+cache/
+config/
+saves/
+output/
+wandb/
+swanlog/
+generated_predictions.jsonl
+predictions_score.json
+
+# VLM-CC specific
+iteration_test_output/
+outputs/
+*.mat
+.env
+.env.local
+
+# large training annotations (use external hosting or generation scripts)
+data/*.json
+!data/dataset_info.json
+!data/demo/
+!data/cam2srgb_matrices.json
+!data/matrices.json
+
+# large LoRA weights (>100MB, hosted on HuggingFace — see scripts/download_models.py)
+models/**/adapter_model.safetensors
+
+# local test results
+visualization/color_space/results_*.json
+cc_scripts/error_histograms/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/

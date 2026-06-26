@@ -1,0 +1,37 @@
+{
+  "crop_size": null,
+  "data_format": "channels_first",
+  "default_to_square": true,
+  "device": null,
+  "do_center_crop": null,
+  "do_convert_rgb": true,
+  "do_normalize": true,
+  "do_pad": null,
+  "do_rescale": true,
+  "do_resize": true,
+  "do_sample_frames": false,
+  "fps": null,
+  "image_mean": [
+    0.48145466,
+    0.4578275,
+    0.40821073
+  ],
+  "image_std": [
+    0.26862954,
+    0.26130258,
+    0.27577711
+  ],
+  "initial_shift": true,
+  "input_data_format": null,
+  "num_frames": null,
+  "processor_class": "InternVLProcessor",
+  "resample": 3,
+  "rescale_factor": 0.00392156862745098,
+  "size": {
+    "height": 384,
+    "width": 384
+  },
+  "size_divisor": null,
+  "video_metadata": null,
+  "video_processor_type": "InternVLVideoProcessor"
+}
