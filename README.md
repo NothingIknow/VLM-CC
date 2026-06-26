@@ -1,6 +1,6 @@
 # VLM-CC: White-Balance First, Adjust Later
 
-**Cross-Camera Color Constancy via Vision-Language Evaluation** — CVPR 2026
+**Cross-Camera Color Constancy via Vision-Language Evaluation** (CVPR 2026)
 
 [Shuwei Li](https://nothingiknow.github.io), [Lei Tan](https://stone96123.github.io), [Robby T. Tan](https://tanrobby.github.io/) · National University of Singapore
 
@@ -17,7 +17,7 @@ Learning-based color constancy methods tend to overfit to the spectral response 
 as **vision-language evaluation**: rather than regressing the illuminant RGB directly, a
 vision-language model judges the dominant **color-cast direction** (Red / Green / Blue) of a
 tentatively white-balanced image, and an iterative loop adjusts the illuminant estimate until
-the residual cast vanishes — *white-balance first, adjust later*.
+the residual cast vanishes, following the "white-balance first, adjust later" strategy.
 
 ```
 predict direction → update illuminant → apply white balance → re-evaluate → … (until converged)
@@ -29,11 +29,11 @@ LoRA fine-tune on top of **Qwen2.5-VL** (or the lightweight **InternVL3.5-1B**),
 [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) with a 16-bit image-precision patch
 (`src/llamafactory/data/mm_plugin.py`) that preserves RAW/sRGB precision through the pipeline.
 
-> **Note.** We first release a **simplified evaluation pipeline** (without the color prior) to
-> make reproduction easy — it already performs close to the numbers reported in the paper, and
-> the full pipeline will follow soon. The original VLM-CC (Qwen2.5-VL-7B) is heavy, but the
-> **lightweight InternVL3.5-1B version needs only ~3.0 GB of GPU memory** — give it a try (see
-> [§5.2 Limited GPU memory](#52-limited-gpu-memory)).
+> **Note.** This repository first provides a **simplified evaluation pipeline** (without the
+> color prior) for ease of reproduction; it already achieves accuracy close to the numbers
+> reported in the paper, and the full pipeline will follow. The full VLM-CC (Qwen2.5-VL-7B) is
+> computationally heavy, whereas the **lightweight InternVL3.5-1B variant requires only about
+> 3.0 GB of GPU memory** (see [§5.3 Limited GPU memory](#53-limited-gpu-memory)).
 
 ## 2. 📊 Dataset
 
@@ -47,10 +47,10 @@ train on three datasets, evaluate zero-shot on the held-out one.
 - Python ≥ 3.9 (tested on 3.10)
 - PyTorch with a matching CUDA toolkit (tested on PyTorch 2.8 / CUDA 12.x)
 - GPU memory (peak, measured at inference):
-  - **Qwen2.5-VL-7B** — ~17 GB (bfloat16) / ~34 GB (float32)
-  - **InternVL3.5-1B** — **~3 GB** (bfloat16); fits a single ≥ 4 GB GPU
+  - **Qwen2.5-VL-7B**: ~17 GB (bfloat16) / ~34 GB (float32)
+  - **InternVL3.5-1B**: ~3 GB (bfloat16), fits a single ≥ 4 GB GPU
 
-  Low on memory? See [5.2 Limited GPU memory](#52-limited-gpu-memory).
+  For limited GPU memory, see [§5.3 Limited GPU memory](#53-limited-gpu-memory).
 
 ```bash
 cd VLM-CC
@@ -58,7 +58,7 @@ pip install -e .
 pip install opencv-python   # required for the 16-bit image pipeline
 ```
 
-`requirements.txt` pins the core dependencies (transformers, peft, scipy, opencv-python, …).
+`requirements.txt` pins the core dependencies (transformers, peft, scipy, opencv-python, etc.).
 
 ## 4. 🎯 Pretrained Models
 
@@ -82,10 +82,11 @@ python scripts/download_models.py            # all adapters
 # python scripts/download_models.py --adapter nus-cube-inter_internvl3.5-1b
 ```
 
-> The **InternVL3.5-1B** adapter is a lightweight alternative for Gehler — a model **7× smaller**
-> (**~3 GB** vs ~17 GB GPU memory in bfloat16) that still lands around the paper numbers. LoRA is loaded separately via `--lora`; the
-> `base_model_name_or_path` in `adapter_config.json` is **not** used automatically, so always
-> match each adapter with the base model in the table.
+> The **InternVL3.5-1B** adapter is a lightweight alternative for Gehler: a model **7× smaller**
+> (**~3 GB** vs. ~17 GB of GPU memory in bfloat16) that remains close to the paper's reported
+> accuracy. The LoRA is loaded separately via `--lora`; the `base_model_name_or_path` in
+> `adapter_config.json` is **not** used automatically, so always match each adapter with the
+> base model listed in the table.
 
 ## 5. 🚀 Usage
 
@@ -99,10 +100,13 @@ CUDA_VISIBLE_DEVICES=0 python scripts/eval/direction_iteration.py \
     --base Qwen/Qwen2.5-VL-7B-Instruct \
     --input assets/smoke_test \
     --output outputs/eval \
-    --iters 0
+    --iters 0 \
+    --save-inter --save-final
 ```
 
-Results go to `outputs/eval/results_<stem>.json` (resolved camera under `"camera"`).
+Each image's outputs are written under `outputs/eval/`: the prediction `results_<stem>.json`
+(the resolved camera is in the `"camera"` field), the per-iteration white-balanced PNGs
+(`--save-inter`), and the final corrected image (`--save-final`).
 
 <details>
 <summary><b>Full <code>direction_iteration.py</code> CLI flags</b></summary>
@@ -129,8 +133,8 @@ Results go to `outputs/eval/results_<stem>.json` (resolved camera under `"camera
 
 Each image needs a **camera type** for black/saturation calibration and the matching CCM in
 `matrices.json`. By default the script auto-detects it from the file path and name, following the
-standard naming convention of each dataset — so the bundled samples and the benchmark datasets
-work out of the box.
+standard naming convention of each dataset, so the bundled samples and the benchmark datasets
+are handled automatically.
 
 To override it (e.g. for your own images), pass `--cam <type>`. Valid values:
 - **Gehler:** `canon1d`, `canon5d`
@@ -141,8 +145,8 @@ To override it (e.g. for your own images), pass `--cam <type>`. Valid values:
 
 ### 5.2 Evaluation
 
-To evaluate a model on a full dataset, point `--input` at the image folder. Example — run the
-Qwen2.5-VL-7B Gehler adapter on the Gehler test set:
+To evaluate a model on a full dataset, point `--input` at the image folder. For example, to run
+the Qwen2.5-VL-7B Gehler adapter on the Gehler test set:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python scripts/eval/direction_iteration.py \
@@ -158,9 +162,9 @@ calibration and the CCM) is auto-detected from the filenames.
 
 ### 5.3 Limited GPU memory
 
-If you don't have a large GPU, switch to the **InternVL3.5-1B** model with **bfloat16** and a
-smaller `--img_size`. This runs in **~3 GB** of GPU memory (fits a ≥ 4 GB card) — vs ~17 GB for
-the Qwen2.5-VL-7B model — with only a small accuracy cost:
+For a smaller GPU, use the **InternVL3.5-1B** model with **bfloat16** and a smaller
+`--img_size`. This runs in **~3 GB** of GPU memory (fitting a ≥ 4 GB card), compared with
+~17 GB for the Qwen2.5-VL-7B model, at only a small accuracy cost:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python scripts/eval/direction_iteration.py \
@@ -170,8 +174,8 @@ CUDA_VISIBLE_DEVICES=0 python scripts/eval/direction_iteration.py \
     --dtype bfloat16 --img_size 256 --iters 30
 ```
 
-Knobs that lower memory, in order of impact: `--dtype bfloat16` (halves the 7B from
-~34 GB → ~17 GB), the InternVL3.5-1B model (~3 GB), and a smaller `--img_size` (e.g. `256`).
+Options that reduce memory usage, in order of impact: `--dtype bfloat16` (halves the 7B from
+~34 GB to ~17 GB), the InternVL3.5-1B model (~3 GB), and a smaller `--img_size` (e.g. `256`).
 
 ## 6. 🙏 Acknowledgements
 

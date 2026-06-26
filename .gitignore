@@ -20,7 +20,6 @@ outputs/
 
 # large training annotations (use external hosting or generation scripts)
 data/*.json
-!data/demo/
 !data/matrices.json
 
 # pretrained adapters — hosted on HuggingFace, fetched via scripts/download_models.py
