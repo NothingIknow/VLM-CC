@@ -20,13 +20,12 @@ outputs/
 
 # large training annotations (use external hosting or generation scripts)
 data/*.json
-!data/dataset_info.json
 !data/demo/
-!data/cam2srgb_matrices.json
 !data/matrices.json
 
-# large LoRA weights (>100MB, hosted on HuggingFace — see scripts/download_models.py)
-models/**/adapter_model.safetensors
+# pretrained adapters — hosted on HuggingFace, fetched via scripts/download_models.py
+models/*
+!models/README.md
 
 # local test results
 visualization/color_space/results_*.json

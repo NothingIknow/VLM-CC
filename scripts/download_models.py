@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Download VLM-CC LoRA weights from HuggingFace into models/.
+"""Download VLM-CC LoRA adapters from HuggingFace into models/.
 
-The large adapter weights (`adapter_model.safetensors`, ~103 MB each) are not stored in
-git — they live in a HuggingFace model repo. The small config/tokenizer files are kept in
-git, so this script only fetches the missing weight files.
+The adapter directories (weights + tokenizer/config) are hosted on a HuggingFace model repo,
+not in git. This script fetches the full adapter folders into `models/<adapter>/`.
 
 Usage:
     python scripts/download_models.py                  # all adapters
-    python scripts/download_models.py --adapter nus-cube-inter_qwen2.5vl-7b
+    python scripts/download_models.py --adapter nus-cube-inter_internvl3.5-1b
     HF_REPO_ID=other-user/vlm-cc python scripts/download_models.py
 
 Set the repo id via --repo or the HF_REPO_ID env var (default below).
@@ -35,7 +34,7 @@ MODELS_DIR = Path(__file__).resolve().parents[1] / "models"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download VLM-CC LoRA weights from HuggingFace")
+    parser = argparse.ArgumentParser(description="Download VLM-CC LoRA adapters from HuggingFace")
     parser.add_argument(
         "--repo",
         default=os.environ.get("HF_REPO_ID", DEFAULT_REPO_ID),
@@ -50,30 +49,29 @@ def main() -> None:
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Re-download even if the weight file already exists",
+        help="Re-download even if the adapter is already present",
     )
     args = parser.parse_args()
 
     print(f"Downloading from HuggingFace repo: {args.repo}")
 
     try:
-        from huggingface_hub import hf_hub_download
+        from huggingface_hub import snapshot_download
     except ImportError:
         sys.exit("huggingface_hub not installed. Run: pip install huggingface_hub")
 
     targets = ADAPTERS if args.adapter == "all" else [args.adapter]
     for name in targets:
-        dest = MODELS_DIR / name / WEIGHT_FILE
-        if dest.exists() and not args.force:
-            print(f"[skip] {name}/{WEIGHT_FILE} already present")
+        if (MODELS_DIR / name / WEIGHT_FILE).exists() and not args.force:
+            print(f"[skip] {name} already present")
             continue
-        print(f"[get ] {name}/{WEIGHT_FILE}  <-  {args.repo}")
-        hf_hub_download(
+        print(f"[get ] {name}  <-  {args.repo}")
+        snapshot_download(
             repo_id=args.repo,
-            filename=f"{name}/{WEIGHT_FILE}",
+            allow_patterns=f"{name}/*",
             local_dir=str(MODELS_DIR),
         )
-        print(f"[ok  ] {dest}")
+        print(f"[ok  ] {MODELS_DIR / name}")
 
     print("\nDone.")
 

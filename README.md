@@ -66,15 +66,15 @@ The released LoRA adapters are named by their **training datasets and
 backbone** (N = NUS-8, C = Cube+, I = Inter-tau, G = Gehler). Each is evaluated zero-shot on the
 held-out benchmark.
 
-| Eval benchmark | Adapter directory (= training data) | Backbone | Base model |
+| Eval benchmark | Adapter directory | Backbone | Base model |
 |----------------|-------------------------------------|----------|-----------|
 | Gehler | `nus-cube-inter_qwen2.5vl-7b/` | Qwen2.5-VL-7B | `Qwen/Qwen2.5-VL-7B-Instruct` |
 | Cube+  | `nus-gehler-inter_qwen2.5vl-7b/` | Qwen2.5-VL-7B | `Qwen/Qwen2.5-VL-7B-Instruct` |
 | NUS-8  | `gehler-cube-inter_qwen2.5vl-7b/` | Qwen2.5-VL-7B | `Qwen/Qwen2.5-VL-7B-Instruct` |
 | Gehler (efficient) | `nus-cube-inter_internvl3.5-1b/` | InternVL3.5-1B | `OpenGVLab/InternVL3_5-1B-HF` |
 
-The weight files are hosted on HuggingFace ([`PeanutBrain/vlm-cc`](https://huggingface.co/PeanutBrain/vlm-cc)),
-not in git. Fetch them after cloning:
+The adapters are hosted on HuggingFace ([`PeanutBrain/vlm-cc`](https://huggingface.co/PeanutBrain/vlm-cc)),
+not in git. Fetch them into `models/` after cloning:
 
 ```bash
 pip install huggingface_hub
@@ -139,7 +139,24 @@ To override it (e.g. for your own images), pass `--cam <type>`. Valid values:
 </details>
 
 
-### 5.2 Limited GPU memory
+### 5.2 Evaluation
+
+To evaluate a model on a full dataset, point `--input` at the image folder. Example — run the
+Qwen2.5-VL-7B Gehler adapter on the Gehler test set:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/eval/direction_iteration.py \
+    --lora models/nus-cube-inter_qwen2.5vl-7b \
+    --base Qwen/Qwen2.5-VL-7B-Instruct \
+    --input /path/to/Gehler/test \
+    --output outputs/eval/gehler \
+    --img_size 512 --iters 30
+```
+
+Per-image predictions are written under `outputs/eval/gehler/`. The camera type (for
+calibration and the CCM) is auto-detected from the filenames.
+
+### 5.3 Limited GPU memory
 
 If you don't have a large GPU, switch to the **InternVL3.5-1B** model with **bfloat16** and a
 smaller `--img_size`. This runs in **~3 GB** of GPU memory (fits a ≥ 4 GB card) — vs ~17 GB for
@@ -153,35 +170,8 @@ CUDA_VISIBLE_DEVICES=0 python scripts/eval/direction_iteration.py \
     --dtype bfloat16 --img_size 256 --iters 30
 ```
 
-Knobs that lower memory / speed up, in order of impact: `--dtype bfloat16` (halves the 7B from
+Knobs that lower memory, in order of impact: `--dtype bfloat16` (halves the 7B from
 ~34 GB → ~17 GB), the InternVL3.5-1B model (~3 GB), and a smaller `--img_size` (e.g. `256`).
-The same `--lora` / `--base_model` / `--dtype` / `--img_size` flags apply to
-`benchmark_reproduce.py` for full-dataset runs.
-
-### 5.3 Evaluation / benchmark reproduction
-
-`scripts/eval/benchmark_reproduce.py` runs a full test set and reports angular-error statistics
-against the paper. `--benchmark` accepts `Gehler`, `NUS8`, `Cube+`, or `all`; a
-`benchmark_summary.json` is written under `--output_root`.
-
-```bash
-# Qwen2.5-VL-7B
-CUDA_VISIBLE_DEVICES=0 python scripts/eval/benchmark_reproduce.py \
-    --benchmark Gehler \
-    --lora models/nus-cube-inter_qwen2.5vl-7b \
-    --start_angle 3 --iterations 30 --img_size 512 --dtype bfloat16 \
-    --output_root outputs/benchmark/gehler
-
-# InternVL3.5-1B (efficient) — also pass the InternVL base model
-CUDA_VISIBLE_DEVICES=0 python scripts/eval/benchmark_reproduce.py \
-    --benchmark Gehler \
-    --lora models/nus-cube-inter_internvl3.5-1b \
-    --base_model OpenGVLab/InternVL3_5-1B-HF \
-    --start_angle 3 --iterations 30 --img_size 512 --dtype bfloat16 \
-    --output_root outputs/benchmark/gehler_internvl
-```
-
-The eval auto-selects the chat template from the base model (`qwen2_vl` / `intern_vl`).
 
 ## 6. 🙏 Acknowledgements
 
